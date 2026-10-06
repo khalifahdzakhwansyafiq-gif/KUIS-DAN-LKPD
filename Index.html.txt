@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>KuisKelas — Platform Kuis & LKPD Digital</title>
+<style>
+  :root{
+    --bg:#faf7f1; --ink:#171321; --muted:#5c5470; --faint:#a99fc0;
+    --purple:#6621d9; --green:#00a862; --blue:#2d5bff; --pink:#e6007e;
+    --orange:#ff6b00; --teal:#0e9fb0; --red:#e52222; --line:#e5ddf5;
+  }
+  *{box-sizing:border-box; margin:0; font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;}
+  body{background:var(--bg); color:var(--ink);
+    background-image:radial-gradient(rgba(102,33,217,.10) 1.5px, transparent 1.5px);
+    background-size:22px 22px;}
+  .wrap{max-width:1000px; margin:0 auto; padding:24px 20px 60px;}
+  h1,h2,h3,.display{letter-spacing:-.02em; font-weight:800;}
+  .card{background:#fff; border:2px solid var(--ink); border-radius:22px; padding:24px;
+    box-shadow:0 4px 0 rgba(23,19,33,.9);}
+  .btn{display:inline-flex; align-items:center; gap:8px; border:2px solid var(--ink);
+    border-radius:16px; padding:12px 20px; font-weight:700; font-size:14px; cursor:pointer;
+    background:#fff; color:var(--ink); box-shadow:0 3px 0 rgba(23,19,33,.9); transition:transform .15s;}
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(0);}
+  .btn.primary{background:var(--purple); color:#fff;}
+  .btn.green{background:var(--green); color:#fff;}
+  .btn.red{background:var(--red); color:#fff;}
+  .btn.ghost{box-shadow:none; border-color:var(--line); color:var(--muted);}
+  .btn.small{padding:8px 14px; font-size:12px; border-radius:12px;}
+  .badge{display:inline-flex; align-items:center; gap:6px; border:1.5px solid var(--ink);
+    border-radius:999px; padding:3px 12px; font-size:11px; font-weight:700; text-transform:uppercase;}
+  .input, select.input, textarea.input{width:100%; border:2px solid var(--line); border-radius:14px;
+    padding:12px 14px; font-size:14px; font-weight:600; background:#fff; outline:none;}
+  .input:focus{border-color:var(--purple); box-shadow:0 3px 0 rgba(23,19,33,.9);}
+  label.lbl{display:block; font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--muted); margin:14px 0 6px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .roomgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:20px;}
+  .qnav button{width:38px; height:38px; border-radius:12px; border:2px solid var(--line);
+    background:#fff; font-weight:800; cursor:pointer;}
+  .qnav button.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  .qnav button.done{background:var(--green); color:#fff; border-color:var(--ink);}
+  .qnav{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  .opt{display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+    border:2px solid var(--line); border-radius:14px; padding:14px 16px; background:#fff;
+    font-weight:600; font-size:14px; cursor:pointer; margin-bottom:10px;}
+  .opt:hover{border-color:var(--ink);}
+  .opt.sel{background:var(--purple); color:#fff; border-color:var(--ink);}
+  .opt .letter{display:grid; place-items:center; width:30px; height:30px; border-radius:10px;
+    border:2px solid var(--ink); background:#efe8fc; color:var(--purple); font-weight:800; flex-shrink:0;}
+  .opt.sel .letter{background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.4); color:#fff;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; padding:14px 0;
+    border-bottom:2px solid rgba(23,19,33,.1); margin-bottom:24px;}
+  .logo{font-weight:800; font-size:18px;}
+  .logo b{color:var(--purple);}
+  .muted{color:var(--muted); font-size:14px;}
+  .small-note{font-size:12px; color:var(--faint); margin-top:6px;}
+  .modal{position:fixed; inset:0; background:rgba(23,19,33,.5); display:grid; place-items:center;
+    padding:16px; z-index:50;}
+  .modal>div{background:var(--bg); max-width:640px; width:100%; max-height:90vh; overflow-y:auto;
+    border:2px solid var(--ink); border-radius:22px; padding:24px; box-shadow:0 4px 0 rgba(23,19,33,.9);}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th,td{text-align:left; padding:10px 12px; border-bottom:1.5px solid var(--line);}
+  th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);}
+  .toast{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--ink);
+    color:#fff; padding:12px 22px; border-radius:14px; font-size:13px; font-weight:700; z-index:99;}
+  .pair-row{display:grid; grid-template-columns:1fr auto 1fr; gap:10px; align-items:center; margin-bottom:10px;}
+  .pair-left{border:2px solid var(--ink); border-radius:14px; background:#def6f8; color:#0e6b78;
+    padding:12px 14px; font-weight:700; font-size:14px;}
+  .hidden{display:none !important;}
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;}
+  .tabs button{border:2px solid var(--line); background:#fff; border-radius:999px; padding:8px 16px;
+    font-size:12px; font-weight:700; cursor:pointer; color:var(--muted);}
+  .tabs button.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+  @media(max-width:640px){ .grid2{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<div id="app" class="wrap"></div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* ============================================================
+   KuisKelas — Frontend (google.script.run)
+   ============================================================ */
+var ROOM_META = {
+  'latihan':        {label:'Latihan',        color:'#00a862', soft:'#e3f7ee'},
+  'tugas-individu': {label:'Tugas Individu', color:'#2d5bff', soft:'#e8edff'},
+  'tugas-kelompok': {label:'Tugas Kelompok', color:'#e6007e', soft:'#ffe3f2'},
+  'lkpd-individu':  {label:'LKPD Individu',  color:'#ff6b00', soft:'#ffeede'},
+  'lkpd-kelompok':  {label:'LKPD Kelompok',  color:'#0e9fb0', soft:'#def6f8'}
+};
+var QT_META = {
+  'pg':          {label:'Pilihan Ganda', color:'#6621d9'},
+  'isian':       {label:'Isian Singkat', color:'#ff6b00'},
+  'menjodohkan': {label:'Menjodohkan',   color:'#0e9fb0'},
+  'essay':       {label:'Essay',         color:'#e6007e'}
+};
+var GROUP_TYPES = ['tugas-kelompok','lkpd-kelompok'];
+
+var S = { view:'home', pin:'', rooms:[], subs:[], student:{}, activeRoom:null,
+          answers:{}, qIndex:0, editRoom:null, editQuestion:null };
+
+var app = document.getElementById('app');
+
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.remove('hidden');
+  setTimeout(function(){ t.classList.add('hidden'); }, 2600);
+}
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+function api(fn){
+  var args = Array.prototype.slice.call(arguments, 1);
+  return new Promise(function(res, rej){
+    var call = google.script.run.withSuccessHandler(res).withFailureHandler(rej);
+    call[fn].apply(call, args);
+  });
+}
+
+function roomBadge(type, soft){
+  var m = ROOM_META[type] || ROOM_META['latihan'];
+  return '<span class="badge" style="background:'+(soft?m.soft:m.color)+
+    ';color:'+(soft?m.color:'#fff')+'">'+m.label+'</span>';
+}
+function fmtDate(d){
+  if(!d) return '';
+  try{ return new Date(d+'T00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'}); }
+  catch(e){ return d; }
+}
+
+/* ================= HALAMAN: Beranda ================= */
+function vHome(){
+  app.innerHTML =
+  '<div style="text-align:center; padding:60px 0 30px">'+
+    '<h1 class="display" style="font-size:44px; line-height:1.05">Belajar jadi <span style="color:var(--purple)">seru,</span><br>menilai jadi mudah.</h1>'+
+    '<p class="muted" style="max-width:520px; margin:16px auto 0">Kuis pilihan ganda, isian, menjodohkan, dan essay — sebagai latihan, tugas, atau LKPD individu maupun kelompok.</p>'+
+  '</div>'+
+  '<div class="grid2" style="max-width:640px; margin:30px auto 0">'+
+    '<div class="card" style="cursor:pointer" onclick="S.view=\'siswa-id\';render()">'+
+      '<h2>Saya Siswa</h2><p class="muted" style="margin-top:6px">Masuk dengan nama & kelas, lalu kerjakan kuis dari gurumu.</p>'+
+      '<p style="margin-top:14px; font-weight:700; color:var(--green); font-size:14px">Mulai mengerjakan →</p>'+
+    '</div>'+
+    '<div class="card" style="cursor:pointer; background:var(--ink); color:#fff" onclick="S.view=\'guru-login\';render()">'+
+      '<h2>Saya Guru</h2><p class="muted" style="margin-top:6px; color:rgba(255,255,255,.7)">Buat ruang tugas, susun soal, dan nilai jawaban siswa.</p>'+
+      '<p style="margin-top:14px; font-weight:700; color:#b18cff; font-size:14px">Buka dasbor guru →</p>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ================= HALAMAN: Identitas siswa ================= */
+function vSiswaId(){
+  app.innerHTML =
+  '<div style="max-width:420px; margin:40px auto">'+
+    '<button class="btn ghost small" onclick="S.view=\'home\';render()">← Kembali</button>'+
+    '<div class="card" style="margin-top:16px">'+
+      '<h2>Halo, Siswa Hebat!</h2>'+
+      '<p class="muted" style="margin-top:6px">Isi namamu supaya nilaimu tercatat benar.</p>'+
+      '<label class="lbl">Nama Lengkap</label>'+
+      '<input id="s-name" class="input" placeholder="cth. Bunga Pratiwi">'+
+      '<label class="lbl">Kelas</label>'+
+      '<input id="s-kelas" class="input" placeholder="cth. 5A">'+
+      '<button class="btn green" style="width:100%; justify-content:center; margin-top:20px" onclick="siswaLogin()">Lihat Ruang Tugas →</button>'+
+    '</div>'+
+  '</div>';
+}
+function siswaLogin(){
+  var n = document.getElementById('s-name').value.trim();
+  var k = document.getElementById('s-kelas').value.trim();
+  if(n.length < 2 || k.length < 1){ toast('Isi nama dan kelas dulu ya!'); return; }
+  S.student = {name:n, kelas:k};
+  S.view = 'rooms'; render();
+  toast('Memuat ruang…');
+  api('getPublishedRooms').then(function(rooms){ S.rooms = rooms; render(); });
+}
+
+/* ================= HALAMAN: Daftar ruang (siswa) ================= */
+function vRooms(){
+  var cards = S.rooms.map(function(r){
+    var m = ROOM_META[r.type] || ROOM_META['latihan'];
+    return '<div class="card">'+
+      '<div style="display:flex; justify-content:space-between; align-items:flex-start">'+
+        '<b style="font-size:15px">'+esc(r.mapel)+' · '+esc(r.kelas)+'</b>'+roomBadge(r.type,true)+
+      '</div>'+
+      '<h3 style="margin-top:8px">'+esc(r.title)+'</h3>'+
+      '<p class="muted" style="margin-top:4px; font-size:13px">'+esc(r.description)+'</p>'+
+      '<p class="small-note">'+r.questions.length+' soal'+(r.deadline?' · Tenggat '+fmtDate(r.deadline):'')+'</p>'+
+      '<button class="btn" style="width:100%; justify-content:center; margin-top:14px; background:'+m.color+'; color:#fff" onclick="startQuiz(\''+r.id+'\')">Mulai Kerjakan →</button>'+
+    '</div>';
+  }).join('');
+  app.innerHTML =
+  '<div class="topbar"><span class="logo">Kuis<b>Kelas</b></span>'+
+    '<span class="muted">'+esc(S.student.name)+' · '+esc(S.student.kelas)+'</span></div>'+
+  '<h1>Ruang Tugas</h1><p class="muted">Pilih ruang dari gurumu, kerjakan, lalu kumpulkan.</p>'+
+  (S.rooms.length ? '<div class="roomgrid">'+cards+'</div>'
+    : '<div class="card" style="margin-top:24px; text-align:center; border-style:dashed; box-shadow:none; border-color:#c9bfe0"><p class="muted">Belum ada ruang yang diterbitkan.</p></div>');
+}
+function startQuiz(roomId){
+  var room = S.rooms.find(function(r){ return String(r.id)===String(roomId); });
+  if(!room) return;
+  if(GROUP_TYPES.indexOf(room.type) >= 0){
+    var g = prompt('Ruang ini dikerjakan berkelompok. Masukkan nama kelompokmu:', 'Kelompok 1');
+    S.student.group = (g && g.trim()) ? g.trim() : 'Kelompok 1';
+  } else S.student.group = '';
+  S.activeRoom = room; S.answers = {}; S.qIndex = 0;
+  // siapkan urutan acak kolom kanan untuk soal menjodohkan
+  room.questions.forEach(function(q){
+    if(q.type==='menjodohkan'){
+      var idx = (q.pairs||[]).map(function(_,i){return i;});
+      for(var i=idx.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=idx[i]; idx[i]=idx[j]; idx[j]=t; }
+      q._shuffled = idx;
+    }
+  });
+  S.view='quiz'; render();
+}
+
+/* ================= HALAMAN: Kuis ================= */
+function vQuiz(){
+  var room = S.activeRoom, qs = room.questions, q = qs[S.qIndex];
+  var nav = qs.map(function(x,i){
+    var a = S.answers[x.id];
+    var done = a!==undefined && a!=='' && !(Array.isArray(a) && a.indexOf(-1)>=0);
+    var cls = i===S.qIndex ? 'active' : (done?'done':'');
+    return '<button class="'+cls+'" onclick="S.qIndex='+i+';render()">'+(i+1)+'</button>';
+  }).join('');
+
+  var body = '';
+  if(q.type==='pg'){
+    body = (q.options||[]).map(function(o,i){
+      return '<button class="opt'+(S.answers[q.id]===i?' sel':'')+'" onclick="S.answers[\''+q.id+'\']='+i+';render()">'+
+        '<span class="letter">'+String.fromCharCode(65+i)+'</span>'+esc(o)+'</button>';
+    }).join('');
+  } else if(q.type==='isian'){
+    body = '<input class="input" placeholder="Tulis jawabanmu…" value="'+esc(S.answers[q.id]||'')+
+      '" oninput="S.answers[\''+q.id+'\']=this.value">'+
+      '<p class="small-note">Dinilai otomatis — perhatikan ejaan ya!</p>';
+  } else if(q.type==='menjodohkan'){
+    var cur = S.answers[q.id] || (q.pairs||[]).map(function(){return -1;});
+    S.answers[q.id] = cur;
+    body = (q.pairs||[]).map(function(p,i){
+      var opts = '<option value="-1">Pilih pasangan…</option>' + q._shuffled.map(function(orig,di){
+        return '<option value="'+di+'"'+(cur[i]===orig?' selected':'')+'>'+esc(q.pairs[orig].right)+'</option>';
+      }).join('');
+      return '<div class="pair-row"><div class="pair-left">'+esc(p.left)+'</div><span>↔</span>'+
+        '<select class="input" onchange="S.answers[\''+q.id+'\']['+i+']='+ 
+        'Number(this.value)>=0?S.activeRoom.questions[S.qIndex]._shuffled[Number(this.value)]:-1;render()">'+opts+'</select></div>';
+    }).join('');
+  } else {
+    body = '<textarea class="input" rows="7" placeholder="Tuliskan jawabanmu selengkap mungkin…" '+
+      'oninput="S.answers[\''+q.id+'\']=this.value">'+esc(S.answers[q.id]||'')+'</textarea>'+
+      '<p class="small-note">Dinilai langsung oleh guru.</p>';
+  }
+
+  var meta = QT_META[q.type];
+  app.innerHTML =
+  '<div class="topbar"><span class="logo">'+esc(room.title)+'</span>'+roomBadge(room.type,true)+'</div>'+
+  '<div class="qnav">'+nav+'</div>'+
+  '<div class="card" style="margin-top:20px">'+
+    '<span class="badge" style="border-color:var(--ink); background:'+meta.color+'22; color:'+meta.color+'">'+meta.label+'</span>'+
+    '<span class="small-note" style="float:right">Soal '+(S.qIndex+1)+'/'+qs.length+' · '+q.points+' poin</span>'+
+    '<h2 style="margin-top:14px; font-size:20px; line-height:1.4">'+esc(q.text)+'</h2>'+
+    '<div style="margin-top:20px">'+body+'</div>'+
+  '</div>'+
+  '<div style="display:flex; justify-content:space-between; margin-top:18px">'+
+    (S.qIndex>0 ? '<button class="btn" onclick="S.qIndex--;render()">← Sebelumnya</button>' : '<span></span>')+
+    (S.qIndex<qs.length-1
+      ? '<button class="btn primary" onclick="S.qIndex++;render()">Berikutnya →</button>'
+      : '<button class="btn green" onclick="submitQuiz()">Kumpulkan Jawaban ✓</button>')+
+  '</div>';
+}
+function submitQuiz(){
+  if(!confirm('Yakin ingin mengumpulkan? Jawaban tidak bisa diubah setelah dikumpulkan.')) return;
+  var room = S.activeRoom;
+  toast('Mengumpulkan…');
+  api('submitAnswers', {
+    roomId: room.id, studentName: S.student.name, kelas: S.student.kelas,
+    groupName: S.student.group || '', answers: S.answers
+  }).then(function(res){
+    S.lastResult = res; S.view='result'; render();
+  }).catch(function(e){ toast('Gagal mengumpulkan: '+e.message); });
+}
+function vResult(){
+  var r = S.lastResult, room = S.activeRoom;
+  var pct = r.maxScore ? Math.round(r.autoScore/r.maxScore*100) : 0;
+  app.innerHTML =
+  '<div style="max-width:440px; margin:40px auto; text-align:center">'+
+    '<div class="card">'+
+      '<div style="width:80px;height:80px;margin:0 auto;border-radius:50%;display:grid;place-items:center;'+
+        'background:'+(pct>=70?'var(--green)':pct>=50?'var(--orange)':'var(--red)')+';color:#fff;'+
+        'font-size:32px;font-weight:800;border:2px solid var(--ink)">'+
+        (pct>=85?'A':pct>=70?'B':pct>=55?'C':'D')+'</div>'+
+      '<h1 style="margin-top:16px">'+esc(S.student.name)+'</h1>'+
+      '<p class="muted">'+esc(room.title)+'</p>'+
+      '<p style="font-size:36px; font-weight:800; margin-top:14px; color:var(--purple)">'+r.autoScore+
+        '<span style="font-size:16px; color:var(--faint)">/'+r.maxScore+'</span></p>'+
+      (r.status==='menunggu-nilai'
+        ? '<p class="small-note" style="color:var(--orange); font-weight:700">Ada essay yang menunggu penilaian guru.</p>' : '')+
+      '<button class="btn primary" style="margin-top:20px" onclick="S.view=\'rooms\';render();api(\'getPublishedRooms\').then(function(x){S.rooms=x;render()})">Kembali ke Daftar Ruang</button>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ================= HALAMAN: Login guru ================= */
+function vGuruLogin(){
+  app.innerHTML =
+  '<div style="max-width:420px; margin:40px auto">'+
+    '<button class="btn ghost small" onclick="S.view=\'home\';render()">← Kembali</button>'+
+    '<div class="card" style="margin-top:16px">'+
+      '<h2>Area Guru</h2><p class="muted" style="margin-top:6px">Masukkan PIN guru.</p>'+
+      '<input id="g-pin" type="password" class="input" placeholder="PIN guru" style="margin-top:14px; text-align:center; letter-spacing:.3em">'+
+      '<button class="btn primary" style="width:100%; justify-content:center; margin-top:16px" onclick="guruLogin()">Masuk Dasbor</button>'+
+    '</div>'+
+  '</div>';
+}
+function guruLogin(){
+  var pin = document.getElementById('g-pin').value;
+  api('loginGuru', pin).then(function(ok){
+    if(!ok){ toast('PIN salah!'); return; }
+    S.pin = pin; S.view='guru'; render();
+    toast('Memuat data…');
+    Promise.all([api('getAllRooms', pin), api('getSubmissions', pin)]).then(function(res){
+      S.rooms = res[0]; S.subs = res[1]; render();
+    });
+  });
+}
+
+/* ================= HALAMAN: Dasbor guru ================= */
+var guruTab = 'rooms';
+function vGuru(){
+  var tabs =
+    '<div class="tabs">'+
+      '<button class="'+(guruTab==='rooms'?'active':'')+'" onclick="guruTab=\'rooms\';render()">Ruang & Soal ('+S.rooms.length+')</button>'+
+      '<button class="'+(guruTab==='subs'?'active':'')+'" onclick="guruTab=\'subs\';render()">Nilai & Jawaban ('+S.subs.length+')</button>'+
+    '</div>';
+  app.innerHTML =
+  '<div class="topbar"><span class="logo">Kuis<b>Kelas</b> · Dasbor Guru</span>'+
+    '<button class="btn ghost small" onclick="S.view=\'home\';render()">Keluar</button></div>'+
+  tabs + '<div id="guru-body"></div>';
+  if(guruTab==='rooms') renderGuruRooms(); else renderGuruSubs();
+}
+
+function renderGuruRooms(){
+  var el = document.getElementById('guru-body');
+  var rows = S.rooms.map(function(r){
+    var pts = (r.questions||[]).reduce(function(a,q){return a+Number(q.points||0);},0);
+    var pub = String(r.published)==='true' || r.published===true;
+    return '<tr>'+
+      '<td>'+roomBadge(r.type,true)+' <b>'+esc(r.title)+'</b><br><span class="small-note">'+esc(r.mapel)+' · '+esc(r.kelas)+' · '+(r.questions||[]).length+' soal · '+pts+' poin</span></td>'+
+      '<td>'+(pub?'<span class="badge" style="border-color:var(--green);background:#e3f7ee;color:var(--green)">TERBIT</span>'
+                :'<span class="badge" style="border-color:#c9bfe0;color:var(--faint)">DRAF</span>')+'</td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="btn small" onclick=\'editRoom('+JSON.stringify(r.id).replace(/"/g,'&quot;')+')\'>Kelola</button> '+
+        '<button class="btn small '+(pub?'ghost':'green')+'" onclick=\'togglePublish('+JSON.stringify(r.id).replace(/"/g,'&quot;')+')\'>'+(pub?'Sembunyikan':'Terbitkan')+'</button> '+
+        '<button class="btn small red" onclick=\'removeRoom('+JSON.stringify(r.id).replace(/"/g,'&quot;')+')\'>Hapus</button>'+
+      '</td></tr>';
+  }).join('');
+  el.innerHTML =
+  '<button class="btn primary" onclick="newRoom()">+ Buat Ruang Baru</button>'+
+  '<div class="card" style="margin-top:16px; overflow-x:auto">'+
+    (S.rooms.length
+      ? '<table><tr><th>Ruang</th><th>Status</th><th>Aksi</th></tr>'+rows+'</table>'
+      : '<p class="muted" style="text-align:center; padding:20px">Belum ada ruang. Buat yang pertama!</p>')+
+  '</div>';
+}
+
+function emptyRoom(){
+  return {id:null, title:'', type:'latihan', mapel:'', kelas:'', description:'', deadline:'', published:false, questions:[]};
+}
+function newRoom(){ S.editRoom = emptyRoom(); S.view='room-edit'; render(); }
+function editRoom(id){
+  var r = S.rooms.find(function(x){ return String(x.id)===String(id); });
+  S.editRoom = JSON.parse(JSON.stringify(r)); S.view='room-edit'; render();
+}
+function togglePublish(id){
+  var r = S.rooms.find(function(x){ return String(x.id)===String(id); });
+  var copy = JSON.parse(JSON.stringify(r));
+  copy.published = !(String(r.published)==='true' || r.published===true);
+  api('saveRoom', S.pin, copy).then(function(){ return api('getAllRooms', S.pin); })
+    .then(function(rooms){ S.rooms = rooms; render(); toast(copy.published?'Ruang diterbitkan ✓':'Ruang disembunyikan'); });
+}
+function removeRoom(id){
+  if(!confirm('Hapus ruang beserta semua soalnya?')) return;
+  api('deleteRoom', S.pin, id).then(function(){ return api('getAllRooms', S.pin); })
+    .then(function(rooms){ S.rooms = rooms; render(); toast('Ruang dihapus'); });
+}
+
+/* ================= HALAMAN: Editor ruang ================= */
+function vRoomEdit(){
+  var r = S.editRoom;
+  var typeBtns = Object.keys(ROOM_META).map(function(t){
+    var m = ROOM_META[t];
+    return '<button class="btn small" style="'+(r.type===t?'background:'+m.color+';color:#fff':'border-color:var(--line);color:var(--muted);box-shadow:none')+
+      '" onclick="S.editRoom.type=\''+t+'\';render()">'+m.label+'</button>';
+  }).join(' ');
+
+  var qRows = r.questions.map(function(q,i){
+    return '<tr><td>'+(i+1)+'. <span class="badge" style="border-color:var(--ink);background:'+QT_META[q.type].color+'22;color:'+QT_META[q.type].color+'">'+QT_META[q.type].label+'</span> '+
+      esc(q.text)+'<br><span class="small-note">'+q.points+' poin</span></td>'+
+      '<td style="white-space:nowrap">'+
+      '<button class="btn small" onclick="editQuestion('+i+')">Ubah</button> '+
+      '<button class="btn small red" onclick="S.editRoom.questions.splice('+i+',1);render()">Hapus</button></td></tr>';
+  }).join('');
+
+  app.innerHTML =
+  '<div class="topbar"><span class="logo">Editor Ruang</span>'+
+    '<button class="btn ghost small" onclick="saveRoomDraft()">Simpan & Kembali</button></div>'+
+  '<div class="card">'+
+    '<label class="lbl">Judul Ruang</label>'+
+    '<input class="input" value="'+esc(r.title)+'" oninput="S.editRoom.title=this.value" placeholder="cth. Latihan Pecahan Bab 2">'+
+    '<label class="lbl">Jenis Ruang</label><div>'+typeBtns+'</div>'+
+    '<div class="grid2">'+
+      '<div><label class="lbl">Mapel</label><input class="input" value="'+esc(r.mapel)+'" oninput="S.editRoom.mapel=this.value"></div>'+
+      '<div><label class="lbl">Kelas</label><input class="input" value="'+esc(r.kelas)+'" oninput="S.editRoom.kelas=this.value"></div>'+
+    '</div>'+
+    '<label class="lbl">Deskripsi / Instruksi</label>'+
+    '<textarea class="input" rows="2" oninput="S.editRoom.description=this.value">'+esc(r.description)+'</textarea>'+
+    '<label class="lbl">Tenggat (opsional)</label>'+
+    '<input type="date" class="input" value="'+esc(r.deadline||'')+'" oninput="S.editRoom.deadline=this.value">'+
+    '<label class="lbl"><input type="checkbox" '+(r.published?'checked':'')+' onchange="S.editRoom.published=this.checked" style="width:auto; margin-right:8px">Terbitkan untuk siswa</label>'+
+  '</div>'+
+  '<div class="card" style="margin-top:16px">'+
+    '<div style="display:flex; justify-content:space-between; align-items:center">'+
+      '<h3>Daftar Soal ('+r.questions.length+')</h3>'+
+      '<button class="btn primary small" onclick="addQuestion()">+ Tambah Soal</button></div>'+
+    (r.questions.length ? '<div style="overflow-x:auto; margin-top:12px"><table>'+qRows+'</table></div>'
+      : '<p class="muted" style="text-align:center; padding:16px">Belum ada soal.</p>')+
+  '</div>'+
+  '<button class="btn green" style="width:100%; justify-content:center; margin-top:16px" onclick="saveRoomDraft()">Simpan Ruang ✓</button>'+
+  '<div id="q-modal"></div>';
+}
+function saveRoomDraft(){
+  var r = S.editRoom;
+  if(!r.title.trim()){ toast('Judul ruang wajib diisi!'); return; }
+  toast('Menyimpan…');
+  api('saveRoom', S.pin, r).then(function(){ return api('getAllRooms', S.pin); })
+    .then(function(rooms){ S.rooms = rooms; S.view='guru'; render(); toast('Ruang tersimpan ✓'); })
+    .catch(function(e){ toast('Gagal: '+e.message); });
+}
+
+/* ================= Editor soal (modal) ================= */
+function addQuestion(){
+  S.editQuestion = {id:uid(), type:'pg', text:'', points:10, options:['','','',''], correctOption:0,
+                    answers:[''], pairs:[{left:'',right:''},{left:'',right:''},{left:'',right:''}], keywords:[]};
+  S.editQuestionIndex = -1;
+  renderQuestionModal();
+}
+function editQuestion(i){
+  S.editQuestion = JSON.parse(JSON.stringify(S.editRoom.questions[i]));
+  S.editQuestionIndex = i;
+  renderQuestionModal();
+}
+function renderQuestionModal(){
+  var q = S.editQuestion;
+  var el = document.getElementById('q-modal');
+  var typeBtns = Object.keys(QT_META).map(function(t){
+    return '<button class="btn small" style="'+(q.type===t?'background:'+QT_META[t].color+';color:#fff':'border-color:var(--line);color:var(--muted);box-shadow:none')+
+      '" onclick="S.editQuestion.type=\''+t+'\';renderQuestionModal()">'+QT_META[t].label+'</button>';
+  }).join(' ');
+
+  var extra = '';
+  if(q.type==='pg'){
+    extra = '<label class="lbl">Pilihan & kunci (angka kunci = nomor pilihan, mulai 0)</label>'+
+      q.options.map(function(o,i){
+        return '<div style="display:flex; gap:8px; margin-bottom:8px; align-items:center">'+
+          '<button class="btn small" style="'+(q.correctOption===i?'background:var(--green);color:#fff':'border-color:var(--line);box-shadow:none')+
+          '" onclick="S.editQuestion.correctOption='+i+';renderQuestionModal()">'+String.fromCharCode(65+i)+'</button>'+
+          '<input class="input" value="'+esc(o)+'" oninput="S.editQuestion.options['+i+']=this.value"></div>';
+      }).join('');
+  } else if(q.type==='isian'){
+    extra = '<label class="lbl">Jawaban yang diterima (satu per baris)</label>'+
+      '<textarea class="input" rows="3" oninput="S.editQuestion.answers=this.value.split(\'\n\')">'+esc((q.answers||[]).join('\n'))+'</textarea>';
+  } else if(q.type==='menjodohkan'){
+    extra = '<label class="lbl">Pasangan kiri — kanan (satu baris = satu pasangan, pisahkan dengan tanda |)</label>'+
+      '<textarea class="input" rows="4" placeholder="1/2 | 0,5&#10;1/4 | 0,25" oninput="S.editQuestion.pairs=this.value.split(\'\\n\').filter(function(l){return l.indexOf(\'|\')>=0}).map(function(l){var p=l.split(\'|\');return {left:p[0].trim(),right:p.slice(1).join(\'|\').trim()}})">'+
+      esc((q.pairs||[]).map(function(p){return p.left+' | '+p.right;}).join('\n'))+'</textarea>'+
+      '<p class="small-note">Kolom kanan diacak otomatis saat siswa mengerjakan.</p>';
+  } else {
+    extra = '<label class="lbl">Kata kunci rubrik (pisahkan koma, opsional)</label>'+
+      '<input class="input" value="'+esc((q.keywords||[]).join(', '))+'" oninput="S.editQuestion.keywords=this.value.split(\',\').map(function(k){return k.trim()}).filter(Boolean)">';
+  }
+
+  el.innerHTML =
+  '<div class="modal"><div>'+
+    '<div style="display:flex; justify-content:space-between; align-items:center">'+
+      '<h3>'+(S.editQuestionIndex>=0?'Ubah Soal':'Tambah Soal')+'</h3>'+
+      '<button class="btn ghost small" onclick="document.getElementById(\'q-modal\').innerHTML=\'\'">Tutup</button></div>'+
+    '<label class="lbl">Jenis Soal</label><div>'+typeBtns+'</div>'+
+    '<label class="lbl">Teks Soal</label>'+
+    '<textarea class="input" rows="3" oninput="S.editQuestion.text=this.value">'+esc(q.text)+'</textarea>'+
+    '<label class="lbl">Poin</label>'+
+    '<input type="number" class="input" style="width:110px" value="'+q.points+'" oninput="S.editQuestion.points=Math.max(1,Number(this.value)||1)">'+
+    extra+
+    '<button class="btn primary" style="width:100%; justify-content:center; margin-top:18px" onclick="saveQuestion()">Simpan Soal</button>'+
+  '</div></div>';
+}
+function saveQuestion(){
+  var q = S.editQuestion;
+  if(q.text.trim().length < 3){ toast('Teks soal wajib diisi!'); return; }
+  if(q.type==='pg' && q.options.filter(function(o){return o.trim();}).length < 2){ toast('Minimal 2 pilihan!'); return; }
+  if(q.type==='isian' && !(q.answers||[]).some(function(a){return a.trim();})){ toast('Isi jawaban yang diterima!'); return; }
+  if(q.type==='menjodohkan' && (q.pairs||[]).length < 2){ toast('Minimal 2 pasangan!'); return; }
+  if(q.type==='pg'){ // rapikan pilihan kosong & kunci
+    var filled = q.options.map(function(o,i){return {o:o,i:i};}).filter(function(x){return x.o.trim();});
+    var key = filled.findIndex(function(x){return x.i===q.correctOption;});
+    q.options = filled.map(function(x){return x.o.trim();});
+    q.correctOption = key>=0?key:0;
+  }
+  if(S.editQuestionIndex>=0) S.editRoom.questions[S.editQuestionIndex]=q;
+  else S.editRoom.questions.push(q);
+  render();
+  toast('Soal ditambahkan ✓');
+}
+
+/* ================= Penilaian guru ================= */
+function renderGuruSubs(){
+  var el = document.getElementById('guru-body');
+  if(!S.subs.length){
+    el.innerHTML = '<div class="card" style="text-align:center"><p class="muted" style="padding:20px">Belum ada jawaban masuk.</p></div>';
+    return;
+  }
+  var rows = S.subs.map(function(s){
+    var room = S.rooms.find(function(r){ return String(r.id)===String(s.roomId); });
+    var essayTotal = 0;
+    Object.keys(s.essayScores||{}).forEach(function(k){ essayTotal += Number(s.essayScores[k])||0; });
+    var total = Number(s.autoScore)+essayTotal;
+    return '<tr>'+
+      '<td><b>'+esc(s.studentName)+'</b>'+(s.groupName?' <span class="small-note">('+esc(s.groupName)+')</span>':'')+
+        '<br><span class="small-note">'+esc(room?room.title:'(ruang dihapus)')+' · '+esc(s.kelas)+'</span></td>'+
+      '<td><b>'+total+'</b><span class="small-note">/'+s.maxScore+'</span></td>'+
+      '<td>'+(s.status==='selesai'
+        ? '<span class="badge" style="border-color:var(--green);background:#e3f7ee;color:var(--green)">SELESAI</span>'
+        : '<span class="badge" style="border-color:var(--orange);background:#ffeede;color:var(--orange)">PERLU DINILAI</span>')+'</td>'+
+      '<td><button class="btn small" onclick=\'gradeSub('+JSON.stringify(s.id).replace(/"/g,'&quot;')+')\'>Periksa</button></td></tr>';
+  }).join('');
+  el.innerHTML = '<div class="card" style="overflow-x:auto"><table><tr><th>Siswa</th><th>Nilai</th><th>Status</th><th></th></tr>'+rows+'</table></div>'+
+  '<div id="grade-modal"></div>';
+}
+function gradeSub(subId){
+  var s = S.subs.find(function(x){ return String(x.id)===String(subId); });
+  var room = S.rooms.find(function(r){ return String(r.id)===String(s.roomId); });
+  if(!room){ toast('Ruang sudah dihapus'); return; }
+  var html = room.questions.map(function(q,i){
+    var ans = s.answers[q.id];
+    var ansTxt = '';
+    if(q.type==='pg') ansTxt = ans!==undefined ? String.fromCharCode(65+Number(ans))+'. '+(q.options||[])[ans] : '—';
+    else if(q.type==='menjodohkan') ansTxt = (q.pairs||[]).map(function(p,j){
+      return esc(p.left)+' → '+esc((q.pairs||[])[ans[j]] ? q.pairs[ans[j]].right : '—'); }).join('<br>');
+    else ansTxt = esc(ans||'—');
+    var out = '<div style="border:2px solid var(--line); border-radius:14px; padding:12px; margin-bottom:10px">'+
+      '<p class="small-note">Soal '+(i+1)+' · '+q.points+' poin</p>'+
+      '<p style="font-weight:700; font-size:14px">'+esc(q.text)+'</p>'+
+      '<p style="margin-top:6px; font-size:14px">'+ansTxt+'</p>';
+    if(q.type==='essay'){
+      var cur = (s.essayScores||{})[q.id];
+      out += '<div style="margin-top:10px; background:#ffe3f2; border-radius:12px; padding:10px">'+
+        '<label class="lbl" style="margin:0; color:var(--pink)">Nilai essay (maks '+q.points+')</label>'+
+        '<input type="number" min="0" max="'+q.points+'" class="input" style="width:100px; margin-top:6px" id="es-'+q.id+'" value="'+(cur!==undefined?cur:'')+'">'+
+        ((q.keywords||[]).length?'<p class="small-note">Acuan: '+esc(q.keywords.join(' · '))+'</p>':'')+'</div>';
+    }
+    return out+'</div>';
+  }).join('');
+  document.getElementById('grade-modal').innerHTML =
+  '<div class="modal"><div>'+
+    '<div style="display:flex; justify-content:space-between; align-items:center">'+
+      '<h3>'+esc(s.studentName)+(s.groupName?' · '+esc(s.groupName):'')+'</h3>'+
+      '<button class="btn ghost small" onclick="document.getElementById(\'grade-modal\').innerHTML=\'\'">Tutup</button></div>'+
+    '<div style="margin-top:14px">'+html+'</div>'+
+    '<button class="btn primary" style="width:100%; justify-content:center" onclick=\'saveGrades('+JSON.stringify(s.id).replace(/"/g,'&quot;')+')\'>Simpan Nilai Essay</button>'+
+  '</div></div>';
+  window._gradingSub = s;
+}
+function saveGrades(subId){
+  var s = S.subs.find(function(x){ return String(x.id)===String(subId); });
+  var room = S.rooms.find(function(r){ return String(r.id)===String(s.roomId); });
+  var scores = s.essayScores || {};
+  var essayIds = [];
+  room.questions.forEach(function(q){
+    if(q.type!=='essay') return;
+    essayIds.push(q.id);
+    var inp = document.getElementById('es-'+q.id);
+    if(inp && inp.value!=='') scores[q.id] = Math.min(q.points, Math.max(0, Number(inp.value)||0));
+  });
+  api('saveEssayScores', S.pin, subId, scores, essayIds)
+    .then(function(){ return api('getSubmissions', S.pin); })
+    .then(function(subs){ S.subs = subs; render(); toast('Nilai tersimpan ✓'); })
+    .catch(function(e){ toast('Gagal: '+e.message); });
+}
+
+/* ================= Router ================= */
+function render(){
+  if(S.view==='home') vHome();
+  else if(S.view==='siswa-id') vSiswaId();
+  else if(S.view==='rooms') vRooms();
+  else if(S.view==='quiz') vQuiz();
+  else if(S.view==='result') vResult();
+  else if(S.view==='guru-login') vGuruLogin();
+  else if(S.view==='guru') vGuru();
+  else if(S.view==='room-edit') vRoomEdit();
+  window.scrollTo(0,0);
+}
+render();
+</script>
+</body>
+</html>
